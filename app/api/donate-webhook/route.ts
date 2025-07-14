@@ -11,16 +11,20 @@ export async function POST(req: Request) {
   try {
     const { name, amount, message, cashAppHandle } = await req.json()
 
+    // IMPORTANT: Replace 'YOUR_DISCORD_USER_ID' with the actual Discord User ID you want to ping.
+    // You can get a user's ID by enabling Developer Mode in Discord, right-clicking their profile, and selecting "Copy ID".
+    const discordPing = `<@1359685371373289613>`
+
     const payload = {
-      username: "SupportMe Donation Bot",
-      avatar_url: "https://i.ibb.co/zh2sXYzD/baa8eys.jpg", // Updated to new image URL
+      username: "josie bot💖",
+      avatar_url: "https://i.ibb.co/zh2sXYzD/baa8eys.jpg",
       embeds: [
         {
           title: "🎉 New Donation Received!",
-          description: `A new supporter might have just sent a donation!`,
+          description: `A new supporter might have just sent a donation! ${discordPing}`, // Ping included here
           color: 0x34bf0d, // Green color
           thumbnail: {
-            url: "https://i.ibb.co/zh2sXYzD/baa8eys.jpg", // Updated to new image URL
+            url: "https://i.ibb.co/zh2sXYzD/baa8eys.jpg",
           },
           fields: [
             {
@@ -35,7 +39,7 @@ export async function POST(req: Request) {
             },
             {
               name: "Cash App Handle",
-              value: `@${cashAppHandle}`,
+              value: `$${cashAppHandle}`,
               inline: true,
             },
             {
@@ -47,7 +51,7 @@ export async function POST(req: Request) {
           timestamp: new Date().toISOString(),
           footer: {
             text: "Powered by SupportMe",
-            icon_url: "https://blob.v0.dev/heart-icon.png", // Placeholder for a heart icon
+            icon_url: "https://blob.v0.dev/heart-icon.png",
           },
         },
       ],

@@ -48,13 +48,19 @@ const defaultContent: SiteContent = {
   description: "Creating content and sharing knowledge. Your support helps me continue doing what I love!",
   aboutText:
     "Thanks for considering supporting my work! Every contribution helps me create better content and keep everything accessible for everyone.",
-  profileImage: "https://i.ibb.co/zh2sXYzD/baa8eys.jpg", // Updated to new image URL
+  profileImage: "https://i.ibb.co/zh2sXYzD/baa8eys.jpg", // Confirmed: Updated to new image URL
   heroTitle: "Love what you do and make money too",
   heroSubtitle: "Support sigmabread's work and help keep the content coming!",
 }
 
 // Discord invite URL (consider moving to .env for production: NEXT_PUBLIC_DISCORD_INVITE_URL)
 const DISCORD_INVITE_URL = "https://discord.gg/ttCVFwRvbu"
+
+// Donation limits
+const MIN_DONATION_AMOUNT = 1 // Cash App minimum
+const MAX_DONATION_AMOUNT = 1250
+const MAX_DONOR_NAME_LENGTH = 64
+const MAX_MESSAGE_LENGTH = 256
 
 export default function SigmaBreadPage() {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
@@ -233,10 +239,25 @@ export default function SigmaBreadPage() {
 
   const handleDonation = useCallback(async () => {
     const amount = selectedAmount || Number.parseFloat(customAmount)
-    if (!amount || amount < 1) {
-      alert("Please enter a valid donation amount (minimum $1).")
+
+    // --- Donation Checks ---
+    if (isNaN(amount) || amount < MIN_DONATION_AMOUNT) {
+      alert(`Please enter a valid donation amount (minimum $${MIN_DONATION_AMOUNT}).`)
       return
     }
+    if (amount > MAX_DONATION_AMOUNT) {
+      alert(`Donation amount cannot exceed $${MAX_DONATION_AMOUNT}.`)
+      return
+    }
+    if (donorName.length > MAX_DONOR_NAME_LENGTH) {
+      alert(`Your name cannot exceed ${MAX_DONOR_NAME_LENGTH} characters.`)
+      return
+    }
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      alert(`Your message cannot exceed ${MAX_MESSAGE_LENGTH} characters.`)
+      return
+    }
+    // --- End Donation Checks ---
 
     setIsDonating(true)
     try {
@@ -552,9 +573,10 @@ export default function SigmaBreadPage() {
                   </Label>
                   <Input
                     id="custom-amount"
-                    placeholder="$1 minimum"
+                    placeholder={`$${MIN_DONATION_AMOUNT} minimum`}
                     type="number"
-                    min="1"
+                    min={MIN_DONATION_AMOUNT}
+                    max={MAX_DONATION_AMOUNT}
                     step="1"
                     className="h-12 text-lg bg-input text-foreground placeholder:text-muted-foreground border-border rounded-lg"
                     value={customAmount}
@@ -563,7 +585,9 @@ export default function SigmaBreadPage() {
                       setSelectedAmount(null)
                     }}
                   />
-                  <p className="text-xs text-muted-foreground">Minimum $1 (Cash App requirement)</p>
+                  <p className="text-xs text-muted-foreground">
+                    Minimum ${MIN_DONATION_AMOUNT}, Maximum ${MAX_DONATION_AMOUNT} (Cash App requirement)
+                  </p>
                 </div>
 
                 {/* New: Donor Name Input */}
@@ -575,10 +599,12 @@ export default function SigmaBreadPage() {
                     id="donor-name"
                     placeholder="Anonymous"
                     type="text"
+                    maxLength={MAX_DONOR_NAME_LENGTH}
                     className="h-12 text-lg bg-input text-foreground placeholder:text-muted-foreground border-border rounded-lg"
                     value={donorName}
                     onChange={(e) => setDonorName(e.target.value)}
                   />
+                  <p className="text-xs text-muted-foreground">Max {MAX_DONOR_NAME_LENGTH} characters</p>
                 </div>
 
                 <div className="space-y-2">
@@ -588,17 +614,22 @@ export default function SigmaBreadPage() {
                   <Textarea
                     id="message"
                     placeholder=""
+                    maxLength={MAX_MESSAGE_LENGTH}
                     className="resize-none bg-input text-foreground placeholder:text-muted-foreground border-border rounded-lg"
                     rows={3}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                   />
+                  <p className="text-xs text-muted-foreground">Max {MAX_MESSAGE_LENGTH} characters</p>
                 </div>
 
                 <Button
                   className="w-full h-12 text-lg font-medium bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md"
                   onClick={handleDonation}
-                  disabled={isDonating || (!selectedAmount && (!customAmount || Number.parseFloat(customAmount) < 1))}
+                  disabled={
+                    isDonating ||
+                    (!selectedAmount && (!customAmount || Number.parseFloat(customAmount) < MIN_DONATION_AMOUNT))
+                  }
                 >
                   {isDonating ? (
                     <>
@@ -614,7 +645,7 @@ export default function SigmaBreadPage() {
                 </Button>
 
                 <div className="text-center">
-                  <p className="text-xs text-muted-foreground">Cash App: @{siteContent.cashApp}</p>
+                  <p className="text-xs text-muted-foreground">Cash App: ${siteContent.cashApp}</p>
                 </div>
               </CardContent>
             </Card>
