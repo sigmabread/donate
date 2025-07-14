@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Heart, Coffee, DollarSign, Share2, Users, Target, Loader2 } from "lucide-react"
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react" // Import useRef
 import { cn } from "@/lib/utils"
 
 const MIN_DONATION_AMOUNT = 1
@@ -24,15 +24,13 @@ export default function CreatorPage({ params }: { params: { username: string } }
   const [donorName, setDonorName] = useState("")
   const [isDonating, setIsDonating] = useState(false)
 
+  // Create refs for the ad containers
+  const creatorHeaderAdRef = useRef<HTMLDivElement>(null)
+  const creatorInFormAdRef = useRef<HTMLDivElement>(null)
+
   // Adsterra script injection
   useEffect(() => {
-    const loadAd = (containerId: string, adKey: string, format: string, height: number, width: number) => {
-      const container = document.getElementById(containerId)
-      if (!container) {
-        console.warn(`Ad container with ID ${containerId} not found.`)
-        return
-      }
-
+    const loadAd = (container: HTMLDivElement, adKey: string, format: string, height: number, width: number) => {
       // Clear existing content in the ad container to prevent duplicates on re-renders
       container.innerHTML = ""
 
@@ -61,23 +59,26 @@ export default function CreatorPage({ params }: { params: { username: string } }
       container.appendChild(adWrapper)
     }
 
-    // Load header ad (320x50)
-    loadAd("creator-header-ad-container", "20b30e54eca31e3ee33b0ff76954df89", "iframe", 50, 320)
+    // Load header ad only when the ref is available
+    if (creatorHeaderAdRef.current) {
+      loadAd(creatorHeaderAdRef.current, "20b30e54eca31e3ee33b0ff76954df89", "iframe", 50, 320)
+    }
 
-    // Load in-form ad (300x160)
-    loadAd("creator-in-form-ad-container", "7dc50cc819e4aa7ff7e4c1fcee6486c3", "iframe", 300, 160)
+    // Load in-form ad only when the ref is available
+    if (creatorInFormAdRef.current) {
+      loadAd(creatorInFormAdRef.current, "7dc50cc819e4aa7ff7e4c1fcee6486c3", "iframe", 300, 160)
+    }
 
     return () => {
-      const headerContainer = document.getElementById("creator-header-ad-container")
-      const inFormContainer = document.getElementById("creator-in-form-ad-container")
-      if (headerContainer) {
-        headerContainer.innerHTML = ""
+      // Clean up when component unmounts or dependencies change
+      if (creatorHeaderAdRef.current) {
+        creatorHeaderAdRef.current.innerHTML = ""
       }
-      if (inFormContainer) {
-        inFormContainer.innerHTML = ""
+      if (creatorInFormAdRef.current) {
+        creatorInFormAdRef.current.innerHTML = ""
       }
     }
-  }, [])
+  }, []) // Empty dependency array means this runs once after initial render
 
   const handleDonation = useCallback(async () => {
     const amount = selectedAmount || Number.parseFloat(customAmount)
@@ -156,7 +157,11 @@ export default function CreatorPage({ params }: { params: { username: string } }
           </Button>
         </div>
         {/* Adsterra Ad - Header Banner */}
-        <div id="creator-header-ad-container" className="container mx-auto px-4 py-2 mt-2 text-center"></div>
+        <div
+          ref={creatorHeaderAdRef}
+          id="creator-header-ad-container"
+          className="container mx-auto px-4 py-2 mt-2 text-center"
+        ></div>
       </header>
 
       <div className="container mx-auto px-4 py-8">
@@ -202,11 +207,11 @@ export default function CreatorPage({ params }: { params: { username: string } }
                   <Target className="w-5 h-5 text-primary" />
                   <CardTitle className="text-foreground text-xl font-semibold">Current Goal</CardTitle>
                 </div>
+              </CardHeader>
+              <CardContent>
                 <CardDescription className="text-muted-foreground">
                   Help me reach my monthly goal to upgrade my equipment!
                 </CardDescription>
-              </CardHeader>
-              <CardContent>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm text-foreground">
                     <span>$750 of $1,000 goal</span>
@@ -372,7 +377,7 @@ export default function CreatorPage({ params }: { params: { username: string } }
                 <p className="text-xs text-muted-foreground text-center">Secure payments powered by Cash App</p>
 
                 {/* Adsterra Ad - In-form Ad */}
-                <div id="creator-in-form-ad-container" className="text-center mt-6"></div>
+                <div ref={creatorInFormAdRef} id="creator-in-form-ad-container" className="text-center mt-6"></div>
               </CardContent>
             </Card>
           </div>

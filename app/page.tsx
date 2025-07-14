@@ -21,7 +21,7 @@ import {
   Key,
   CheckCircle,
 } from "lucide-react"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react" // Import useRef
 import {
   Dialog,
   DialogContent,
@@ -82,6 +82,10 @@ export default function SigmaBreadPage() {
   const [siteContent, setSiteContent] = useState<SiteContent>(defaultContent)
   const [editContent, setEditContent] = useState<SiteContent>(defaultContent)
 
+  // Create refs for the ad containers
+  const headerAdRef = useRef<HTMLDivElement>(null)
+  const inFormAdRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     const fetchSiteContent = async () => {
       setIsLoadingContent(true)
@@ -141,13 +145,7 @@ export default function SigmaBreadPage() {
 
   // Adsterra script injection
   useEffect(() => {
-    const loadAd = (containerId: string, adKey: string, format: string, height: number, width: number) => {
-      const container = document.getElementById(containerId)
-      if (!container) {
-        console.warn(`Ad container with ID ${containerId} not found.`)
-        return
-      }
-
+    const loadAd = (container: HTMLDivElement, adKey: string, format: string, height: number, width: number) => {
       // Clear existing content in the ad container to prevent duplicates on re-renders
       container.innerHTML = ""
 
@@ -177,23 +175,26 @@ export default function SigmaBreadPage() {
       container.appendChild(adWrapper)
     }
 
-    // Load header ad (320x50)
-    loadAd("header-ad-container", "20b30e54eca31e3ee33b0ff76954df89", "iframe", 50, 320)
+    // Load header ad only when the ref is available
+    if (headerAdRef.current) {
+      loadAd(headerAdRef.current, "20b30e54eca31e3ee33b0ff76954df89", "iframe", 50, 320)
+    }
 
-    // Load in-form ad (300x160)
-    loadAd("in-form-ad-container", "7dc50cc819e4aa7ff7e4c1fcee6486c3", "iframe", 300, 160)
+    // Load in-form ad only when the ref is available
+    if (inFormAdRef.current) {
+      loadAd(inFormAdRef.current, "7dc50cc819e4aa7ff7e4c1fcee6486c3", "iframe", 300, 160)
+    }
 
     return () => {
-      const headerAdContainer = document.getElementById("header-ad-container")
-      const inFormAdContainer = document.getElementById("in-form-ad-container")
-      if (headerAdContainer) {
-        headerAdContainer.innerHTML = ""
+      // Clean up when component unmounts or dependencies change
+      if (headerAdRef.current) {
+        headerAdRef.current.innerHTML = ""
       }
-      if (inFormAdContainer) {
-        inFormAdContainer.innerHTML = ""
+      if (inFormAdRef.current) {
+        inFormAdRef.current.innerHTML = ""
       }
     }
-  }, [])
+  }, []) // Empty dependency array means this runs once after initial render
 
   const handleAdminLogin = useCallback(async () => {
     setIsLoggingIn(true)
@@ -444,7 +445,7 @@ export default function SigmaBreadPage() {
           </nav>
         </div>
         {/* Adsterra Ad - Header Banner */}
-        <div id="header-ad-container" className="container mx-auto px-4 py-2 mt-2 text-center"></div>
+        <div ref={headerAdRef} id="header-ad-container" className="container mx-auto px-4 py-2 mt-2 text-center"></div>
       </header>
 
       {/* Hero Section */}
@@ -687,7 +688,7 @@ export default function SigmaBreadPage() {
                 </div>
 
                 {/* Adsterra Ad - In-form Ad */}
-                <div id="in-form-ad-container" className="text-center mt-6"></div>
+                <div ref={inFormAdRef} id="in-form-ad-container" className="text-center mt-6"></div>
               </CardContent>
             </Card>
           </div>
