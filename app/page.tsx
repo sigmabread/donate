@@ -54,7 +54,7 @@ const defaultContent: SiteContent = {
 }
 
 // Discord invite URL (consider moving to .env for production: NEXT_PUBLIC_DISCORD_INVITE_URL)
-const DISCORD_INVITE_URL = "https://discord.gg/ttCVFwRvbu"
+const DISCORD_INVITE_URL = "https://discord.gg/EQmVJ4ApCU"
 
 // Donation limits
 const MIN_DONATION_AMOUNT = 1 // Cash App minimum
