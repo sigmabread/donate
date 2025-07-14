@@ -18,7 +18,7 @@ export async function GET() {
         description: "Creating content and sharing knowledge. Your support helps me continue doing what I love!",
         aboutText:
           "Thanks for considering supporting my work! Every contribution helps me create better content and keep everything accessible for everyone.",
-        profileImage: "/dog-profile.jpg", // This will be replaced by the actual image URL from the client
+        profileImage: "/josie.jpg", // Ensure Josie's picture is the default
         heroTitle: "Love what you do and make money too",
         heroSubtitle: "Support sigmabread's work and help keep the content coming!",
       }

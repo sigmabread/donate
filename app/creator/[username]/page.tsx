@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Heart, Coffee, DollarSign, Share2, Users, Target } from "lucide-react"
 import { useState } from "react"
+import { cn } from "@/lib/utils"
 
 export default function CreatorPage({ params }: { params: { username: string } }) {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
@@ -25,19 +26,24 @@ export default function CreatorPage({ params }: { params: { username: string } }
     }
   }
 
+  // This page doesn't have a theme toggle, so it will use the default light theme styling
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50">
+    <div className="min-h-screen bg-background text-foreground font-sans">
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm">
+      <header className="border-b border-border bg-card shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-              <Heart className="w-5 h-5 text-white fill-current" />
+            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+              <Heart className="w-5 h-5 text-primary-foreground fill-current" />
             </div>
-            <span className="text-xl font-bold text-gray-900">SupportMe</span>
+            <span className="text-xl font-bold text-foreground">SupportMe</span>
           </div>
 
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-input bg-input hover:bg-input/90 text-foreground rounded-lg"
+          >
             <Share2 className="w-4 h-4 mr-2" />
             Share
           </Button>
@@ -48,22 +54,24 @@ export default function CreatorPage({ params }: { params: { username: string } }
         <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
           {/* Creator Profile */}
           <div className="lg:col-span-2 space-y-6">
-            <Card>
+            <Card className="bg-card text-card-foreground border border-border rounded-xl shadow-lg">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <Avatar className="w-20 h-20">
-                    <AvatarImage src="/placeholder.svg?height=80&width=80" />
-                    <AvatarFallback className="text-2xl">{params.username.charAt(0).toUpperCase()}</AvatarFallback>
+                  <Avatar className="w-20 h-20 border-2 border-primary">
+                    <AvatarImage src="/josie.jpg" /> {/* Removed query parameters */}
+                    <AvatarFallback className="text-2xl bg-secondary text-secondary-foreground">
+                      {params.username.charAt(0).toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
 
                   <div className="flex-1">
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">@{params.username}</h1>
-                    <p className="text-gray-600 mb-4">
+                    <h1 className="text-2xl font-bold text-foreground mb-2">@{params.username}</h1>
+                    <p className="text-muted-foreground mb-4">
                       Creating amazing content and sharing knowledge with the world. Your support helps me continue
                       doing what I love!
                     </p>
 
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <Users className="w-4 h-4" />
                         <span>1,234 supporters</span>
@@ -79,30 +87,32 @@ export default function CreatorPage({ params }: { params: { username: string } }
             </Card>
 
             {/* Current Goal */}
-            <Card>
+            <Card className="bg-card text-card-foreground border border-border rounded-xl shadow-lg">
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <Target className="w-5 h-5 text-orange-500" />
-                  <CardTitle>Current Goal</CardTitle>
+                  <Target className="w-5 h-5 text-primary" />
+                  <CardTitle className="text-foreground text-xl font-semibold">Current Goal</CardTitle>
                 </div>
-                <CardDescription>Help me reach my monthly goal to upgrade my equipment!</CardDescription>
+                <CardDescription className="text-muted-foreground">
+                  Help me reach my monthly goal to upgrade my equipment!
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-sm text-foreground">
                     <span>$750 of $1,000 goal</span>
                     <span>75%</span>
                   </div>
-                  <Progress value={75} className="h-2" />
-                  <p className="text-sm text-gray-600">$250 to go! Thank you for your amazing support.</p>
+                  <Progress value={75} className="h-2 bg-secondary" /> {/* Progress bar background */}
+                  <p className="text-sm text-muted-foreground">$250 to go! Thank you for your amazing support.</p>
                 </div>
               </CardContent>
             </Card>
 
             {/* Recent Supporters */}
-            <Card>
+            <Card className="bg-card text-card-foreground border border-border rounded-xl shadow-lg">
               <CardHeader>
-                <CardTitle>Recent Supporters</CardTitle>
+                <CardTitle className="text-foreground text-xl font-semibold">Recent Supporters</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -112,18 +122,20 @@ export default function CreatorPage({ params }: { params: { username: string } }
                     { name: "Mike R.", amount: 5, message: "" },
                     { name: "Anonymous", amount: 15, message: "Thanks for sharing your knowledge" },
                   ].map((supporter, index) => (
-                    <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div key={index} className="flex items-start gap-3 p-3 bg-muted rounded-lg">
                       <Avatar className="w-8 h-8">
-                        <AvatarFallback className="text-xs">{supporter.name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback className="text-xs bg-secondary text-secondary-foreground">
+                          {supporter.name.charAt(0)}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm">{supporter.name}</span>
-                          <Badge variant="secondary" className="text-xs">
+                          <span className="font-medium text-sm text-foreground">{supporter.name}</span>
+                          <Badge variant="secondary" className="bg-secondary text-secondary-foreground text-xs">
                             ${supporter.amount}
                           </Badge>
                         </div>
-                        {supporter.message && <p className="text-sm text-gray-600 mt-1">{supporter.message}</p>}
+                        {supporter.message && <p className="text-sm text-muted-foreground mt-1">{supporter.message}</p>}
                       </div>
                     </div>
                   ))}
@@ -134,13 +146,13 @@ export default function CreatorPage({ params }: { params: { username: string } }
 
           {/* Donation Form */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-4">
+            <Card className="sticky top-4 bg-card text-card-foreground border border-border rounded-xl shadow-lg">
               <CardHeader className="text-center">
-                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Coffee className="w-8 h-8 text-orange-600" />
+                <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Coffee className="w-8 h-8 text-secondary-foreground" />
                 </div>
-                <CardTitle className="text-xl">Buy me a coffee</CardTitle>
-                <CardDescription>Show your support with a donation</CardDescription>
+                <CardTitle className="text-xl font-semibold text-foreground">Buy me a coffee</CardTitle>
+                <CardDescription className="text-muted-foreground">Show your support with a donation</CardDescription>
               </CardHeader>
 
               <CardContent className="space-y-4">
@@ -149,7 +161,12 @@ export default function CreatorPage({ params }: { params: { username: string } }
                     <Button
                       key={amount}
                       variant={selectedAmount === amount ? "default" : "outline"}
-                      className="h-12"
+                      className={cn(
+                        "h-12 rounded-lg",
+                        selectedAmount === amount
+                          ? "bg-primary hover:bg-primary/90 text-primary-foreground"
+                          : "bg-input hover:bg-input/90 text-foreground border-border",
+                      )}
                       onClick={() => {
                         setSelectedAmount(amount)
                         setCustomAmount("")
@@ -161,7 +178,9 @@ export default function CreatorPage({ params }: { params: { username: string } }
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="custom-amount">Custom amount</Label>
+                  <Label htmlFor="custom-amount" className="text-foreground">
+                    Custom amount
+                  </Label>
                   <Input
                     id="custom-amount"
                     placeholder="Enter amount"
@@ -171,15 +190,18 @@ export default function CreatorPage({ params }: { params: { username: string } }
                       setCustomAmount(e.target.value)
                       setSelectedAmount(null)
                     }}
+                    className="bg-input text-foreground placeholder:text-muted-foreground border-border rounded-lg"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="message">Message (optional)</Label>
+                  <Label htmlFor="message" className="text-foreground">
+                    Message (optional)
+                  </Label>
                   <Textarea
                     id="message"
                     placeholder="Say something nice..."
-                    className="resize-none"
+                    className="resize-none bg-input text-foreground placeholder:text-muted-foreground border-border rounded-lg"
                     rows={3}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
@@ -188,19 +210,22 @@ export default function CreatorPage({ params }: { params: { username: string } }
 
                 <div className="space-y-2">
                   <Button
-                    className="w-full bg-green-600 hover:bg-green-700"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg shadow-md"
                     onClick={handleDonation}
                     disabled={!selectedAmount && !customAmount}
                   >
                     <DollarSign className="w-4 h-4 mr-2" />
                     Pay with Cash App
                   </Button>
-                  <Button variant="outline" className="w-full bg-transparent">
+                  <Button
+                    variant="outline"
+                    className="w-full bg-input hover:bg-input/90 text-foreground border-border rounded-lg"
+                  >
                     Other payment methods
                   </Button>
                 </div>
 
-                <p className="text-xs text-gray-500 text-center">Secure payments powered by Cash App</p>
+                <p className="text-xs text-muted-foreground text-center">Secure payments powered by Cash App</p>
               </CardContent>
             </Card>
           </div>
