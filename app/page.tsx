@@ -30,7 +30,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
-import { cn } from "@/lib/utils" // Import cn for conditional class joining
+import { cn } from "@/lib/utils"
 
 interface SiteContent {
   name: string
@@ -48,58 +48,46 @@ const defaultContent: SiteContent = {
   description: "Creating content and sharing knowledge. Your support helps me continue doing what I love!",
   aboutText:
     "Thanks for considering supporting my work! Every contribution helps me create better content and keep everything accessible for everyone.",
-  profileImage: "https://i.ibb.co/zh2sXYzD/baa8eys.jpg", // Confirmed: Updated to new image URL
+  profileImage: "https://i.ibb.co/zh2sXYzD/baa8eys.jpg",
   heroTitle: "Love what you do and make money too",
   heroSubtitle: "Support sigmabread's work and help keep the content coming!",
 }
 
-// Discord invite URL (consider moving to .env for production: NEXT_PUBLIC_DISCORD_INVITE_URL)
 const DISCORD_INVITE_URL = "https://discord.gg/EQmVJ4ApCU"
 
-// Donation limits
-const MIN_DONATION_AMOUNT = 1 // Cash App minimum
+const MIN_DONATION_AMOUNT = 1
 const MAX_DONATION_AMOUNT = 1250
 const MAX_DONOR_NAME_LENGTH = 64
 const MAX_MESSAGE_LENGTH = 256
-
-// Declare adsbygoogle on the Window object
-declare global {
-  interface Window {
-    adsbygoogle: unknown[]
-  }
-}
 
 export default function SigmaBreadPage() {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [customAmount, setCustomAmount] = useState("")
   const [message, setMessage] = useState("")
-  const [donorName, setDonorName] = useState("") // New state for donor name
+  const [donorName, setDonorName] = useState("")
   const [isDarkMode, setIsDarkMode] = useState(false)
 
-  // Admin states
   const [isAdmin, setIsAdmin] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [showAdminLogin, setShowAdminLogin] = useState(false)
-  const [adminKey, setAdminKey] = useState("") // For password login
-  const [loginError, setLoginError] = useState<string | null>(null) // For login errors
-  const [isLoggingIn, setIsLoggingIn] = useState(false) // For login loading state
-  const [isSaving, setIsSaving] = useState(false) // For save loading state
-  const [isLoadingContent, setIsLoadingContent] = useState(true) // For initial content loading
+  const [adminKey, setAdminKey] = useState("")
+  const [loginError, setLoginError] = useState<string | null>(null)
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isLoadingContent, setIsLoadingContent] = useState(true)
 
-  // Donation states
-  const [isDonating, setIsDonating] = useState(false) // For donation button loading state
-  const [showThankYouPopup, setShowThankYouPopup] = useState(false) // For thank you popup
+  const [isDonating, setIsDonating] = useState(false)
+  const [showThankYouPopup, setShowThankYouPopup] = useState(false)
 
   const [siteContent, setSiteContent] = useState<SiteContent>(defaultContent)
   const [editContent, setEditContent] = useState<SiteContent>(defaultContent)
 
-  // Load saved content and check admin status from server on initial load
   useEffect(() => {
     const fetchSiteContent = async () => {
       setIsLoadingContent(true)
       try {
         const response = await fetch("/api/site-content", {
-          credentials: "include", // Ensure cookies are sent for content fetch
+          credentials: "include",
         })
         if (response.ok) {
           const data = await response.json()
@@ -107,13 +95,11 @@ export default function SigmaBreadPage() {
           setEditContent(data)
         } else {
           console.error("Failed to fetch site content:", response.statusText)
-          // Fallback to default content if fetching fails
           setSiteContent(defaultContent)
           setEditContent(defaultContent)
         }
       } catch (error) {
         console.error("Failed to fetch site content:", error)
-        // Fallback to default content if fetching fails
         setSiteContent(defaultContent)
         setEditContent(defaultContent)
       } finally {
@@ -124,8 +110,8 @@ export default function SigmaBreadPage() {
     const checkAuthStatus = async () => {
       try {
         const response = await fetch("/api/admin-login", {
-          credentials: "include", // Ensure cookies are sent for admin status check
-        }) // Endpoint for status check
+          credentials: "include",
+        })
         const data = await response.json()
         setIsAdmin(data.isAdmin)
       } catch (error) {
@@ -143,7 +129,6 @@ export default function SigmaBreadPage() {
     }
   }, [])
 
-  // Apply theme to document
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add("dark")
@@ -154,18 +139,62 @@ export default function SigmaBreadPage() {
     }
   }, [isDarkMode])
 
-  // Trigger AdSense ads after component mounts
+  // Adsterra script injection
   useEffect(() => {
-    if (typeof window !== "undefined" && window.adsbygoogle) {
-      try {
-        ;(window.adsbygoogle = window.adsbygoogle || []).push({})
-      } catch (e) {
-        console.error("AdSense push error:", e)
+    const loadAd = (containerId: string, adKey: string, format: string, height: number, width: number) => {
+      const container = document.getElementById(containerId)
+      if (!container) {
+        console.warn(`Ad container with ID ${containerId} not found.`)
+        return
+      }
+
+      // Clear existing content in the ad container to prevent duplicates on re-renders
+      container.innerHTML = ""
+
+      // Create a div to hold the ad scripts, as some ad networks prefer this
+      const adWrapper = document.createElement("div")
+      adWrapper.style.width = `${width}px`
+      adWrapper.style.height = `${height}px`
+      adWrapper.style.margin = "0 auto" // Center the ad if needed
+
+      const script1 = document.createElement("script")
+      script1.type = "text/javascript"
+      // IMPORTANT: Declare atOptions with 'var' inside the script content
+      script1.innerHTML = `var atOptions = {
+        'key' : '${adKey}',
+        'format' : '${format}',
+        'height' : ${height},
+        'width' : ${width},
+        'params' : {}
+      };`
+      adWrapper.appendChild(script1)
+
+      const script2 = document.createElement("script")
+      script2.type = "text/javascript"
+      script2.src = `//www.highperformanceformat.com/${adKey}/invoke.js`
+      adWrapper.appendChild(script2)
+
+      container.appendChild(adWrapper)
+    }
+
+    // Load header ad (320x50)
+    loadAd("header-ad-container", "20b30e54eca31e3ee33b0ff76954df89", "iframe", 50, 320)
+
+    // Load in-form ad (300x160)
+    loadAd("in-form-ad-container", "7dc50cc819e4aa7ff7e4c1fcee6486c3", "iframe", 300, 160)
+
+    return () => {
+      const headerAdContainer = document.getElementById("header-ad-container")
+      const inFormAdContainer = document.getElementById("in-form-ad-container")
+      if (headerAdContainer) {
+        headerAdContainer.innerHTML = ""
+      }
+      if (inFormAdContainer) {
+        inFormAdContainer.innerHTML = ""
       }
     }
   }, [])
 
-  // handleAdminLogin for password only
   const handleAdminLogin = useCallback(async () => {
     setIsLoggingIn(true)
     setLoginError(null)
@@ -176,7 +205,7 @@ export default function SigmaBreadPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ key: adminKey }),
-        credentials: "include", // Ensure cookies are sent for login
+        credentials: "include",
       })
 
       if (response.ok) {
@@ -200,7 +229,7 @@ export default function SigmaBreadPage() {
     try {
       const response = await fetch("/api/admin-logout", {
         method: "POST",
-        credentials: "include", // Ensure cookies are sent for logout
+        credentials: "include",
       })
       if (response.ok) {
         setIsAdmin(false)
@@ -224,7 +253,7 @@ export default function SigmaBreadPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(editContent),
-        credentials: "include", // Crucial: Ensure cookies are sent with this request
+        credentials: "include",
       })
 
       if (response.ok) {
@@ -258,7 +287,6 @@ export default function SigmaBreadPage() {
   const handleDonation = useCallback(async () => {
     const amount = selectedAmount || Number.parseFloat(customAmount)
 
-    // --- Donation Checks ---
     if (isNaN(amount) || amount < MIN_DONATION_AMOUNT) {
       alert(`Please enter a valid donation amount (minimum $${MIN_DONATION_AMOUNT}).`)
       return
@@ -275,18 +303,12 @@ export default function SigmaBreadPage() {
       alert(`Your message cannot exceed ${MAX_MESSAGE_LENGTH} characters.`)
       return
     }
-    // --- End Donation Checks ---
 
     setIsDonating(true)
     try {
-      // 1. Redirect to Cash App
-      // Note: The webhook is sent immediately after redirection.
-      // For true "only if actually donated" confirmation, a server-side
-      // integration with a payment processor's webhook system would be required.
       const cashAppUrl = `https://cash.app/$${siteContent.cashApp}/${amount}`
       window.open(cashAppUrl, "_blank")
 
-      // 2. Send webhook notification
       const webhookResponse = await fetch("/api/donate-webhook", {
         method: "POST",
         headers: {
@@ -302,11 +324,8 @@ export default function SigmaBreadPage() {
 
       if (!webhookResponse.ok) {
         console.error("Failed to send donation webhook:", await webhookResponse.text())
-        // Optionally, alert the user about webhook failure but proceed with donation
-        // alert("Donation processed, but failed to send notification. Please check console for details.")
       }
 
-      // 3. Show thank you popup and clear form
       setShowThankYouPopup(true)
       setSelectedAmount(null)
       setCustomAmount("")
@@ -424,17 +443,8 @@ export default function SigmaBreadPage() {
             </Button>
           </nav>
         </div>
-        {/* AdSense Ad - Header Banner */}
-        <div className="container mx-auto px-4 py-2 mt-2 text-center">
-          <ins
-            className="adsbygoogle"
-            style={{ display: "block" }}
-            data-ad-client="ca-pub-9971726695182172"
-            data-ad-slot="YOUR_HEADER_AD_SLOT_ID" // REPLACE WITH YOUR AD SLOT ID
-            data-ad-format="auto"
-            data-full-width-responsive="true"
-          ></ins>
-        </div>
+        {/* Adsterra Ad - Header Banner */}
+        <div id="header-ad-container" className="container mx-auto px-4 py-2 mt-2 text-center"></div>
       </header>
 
       {/* Hero Section */}
@@ -619,7 +629,6 @@ export default function SigmaBreadPage() {
                   </p>
                 </div>
 
-                {/* New: Donor Name Input */}
                 <div className="space-y-2">
                   <Label htmlFor="donor-name" className="text-sm font-medium text-foreground">
                     Your name (optional)
@@ -677,17 +686,8 @@ export default function SigmaBreadPage() {
                   <p className="text-xs text-muted-foreground">Cash App: ${siteContent.cashApp}</p>
                 </div>
 
-                {/* AdSense Ad - In-form Ad */}
-                <div className="text-center mt-6">
-                  <ins
-                    className="adsbygoogle"
-                    style={{ display: "block" }}
-                    data-ad-client="ca-pub-9971726695182172"
-                    data-ad-slot="YOUR_IN_FORM_AD_SLOT_ID" // REPLACE WITH YOUR AD SLOT ID
-                    data-ad-format="auto"
-                    data-full-width-responsive="true"
-                  ></ins>
-                </div>
+                {/* Adsterra Ad - In-form Ad */}
+                <div id="in-form-ad-container" className="text-center mt-6"></div>
               </CardContent>
             </Card>
           </div>
@@ -730,7 +730,7 @@ export default function SigmaBreadPage() {
                 value={adminKey}
                 onChange={(e) => {
                   setAdminKey(e.target.value)
-                  setLoginError(null) // Clear error on input change
+                  setLoginError(null)
                 }}
                 className="w-full pl-10 pr-4 py-2 border border-input bg-input rounded-lg shadow-sm focus:outline-none focus:ring-ring focus:border-primary text-foreground placeholder:text-muted-foreground"
                 placeholder="Enter your secret key"

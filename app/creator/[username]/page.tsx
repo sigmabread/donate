@@ -9,36 +9,72 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Heart, Coffee, DollarSign, Share2, Users, Target, Loader2 } from "lucide-react"
-import { useState, useCallback, useEffect } from "react" // Import useEffect
+import { useState, useCallback, useEffect } from "react"
 import { cn } from "@/lib/utils"
 
-// Donation limits
-const MIN_DONATION_AMOUNT = 1 // Cash App minimum
+const MIN_DONATION_AMOUNT = 1
 const MAX_DONATION_AMOUNT = 1250
 const MAX_DONOR_NAME_LENGTH = 64
 const MAX_MESSAGE_LENGTH = 256
-
-// Declare adsbygoogle on the Window object
-declare global {
-  interface Window {
-    adsbygoogle: unknown[]
-  }
-}
 
 export default function CreatorPage({ params }: { params: { username: string } }) {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [customAmount, setCustomAmount] = useState("")
   const [message, setMessage] = useState("")
-  const [donorName, setDonorName] = useState("") // New state for donor name
-  const [isDonating, setIsDonating] = useState(false) // For donation button loading state
+  const [donorName, setDonorName] = useState("")
+  const [isDonating, setIsDonating] = useState(false)
 
-  // Trigger AdSense ads after component mounts
+  // Adsterra script injection
   useEffect(() => {
-    if (typeof window !== "undefined" && window.adsbygoogle) {
-      try {
-        ;(window.adsbygoogle = window.adsbygoogle || []).push({})
-      } catch (e) {
-        console.error("AdSense push error:", e)
+    const loadAd = (containerId: string, adKey: string, format: string, height: number, width: number) => {
+      const container = document.getElementById(containerId)
+      if (!container) {
+        console.warn(`Ad container with ID ${containerId} not found.`)
+        return
+      }
+
+      // Clear existing content in the ad container to prevent duplicates on re-renders
+      container.innerHTML = ""
+
+      // Create a div to hold the ad scripts, as some ad networks prefer this
+      const adWrapper = document.createElement("div")
+      adWrapper.style.width = `${width}px`
+      adWrapper.style.height = `${height}px`
+      adWrapper.style.margin = "0 auto" // Center the ad if needed
+
+      const script1 = document.createElement("script")
+      script1.type = "text/javascript"
+      script1.innerHTML = `var atOptions = {
+        'key' : '${adKey}',
+        'format' : '${format}',
+        'height' : ${height},
+        'width' : ${width},
+        'params' : {}
+      };`
+      adWrapper.appendChild(script1)
+
+      const script2 = document.createElement("script")
+      script2.type = "text/javascript"
+      script2.src = `//www.highperformanceformat.com/${adKey}/invoke.js`
+      adWrapper.appendChild(script2)
+
+      container.appendChild(adWrapper)
+    }
+
+    // Load header ad (320x50)
+    loadAd("creator-header-ad-container", "20b30e54eca31e3ee33b0ff76954df89", "iframe", 50, 320)
+
+    // Load in-form ad (300x160)
+    loadAd("creator-in-form-ad-container", "7dc50cc819e4aa7ff7e4c1fcee6486c3", "iframe", 300, 160)
+
+    return () => {
+      const headerContainer = document.getElementById("creator-header-ad-container")
+      const inFormContainer = document.getElementById("creator-in-form-ad-container")
+      if (headerContainer) {
+        headerContainer.innerHTML = ""
+      }
+      if (inFormContainer) {
+        inFormContainer.innerHTML = ""
       }
     }
   }, [])
@@ -46,7 +82,6 @@ export default function CreatorPage({ params }: { params: { username: string } }
   const handleDonation = useCallback(async () => {
     const amount = selectedAmount || Number.parseFloat(customAmount)
 
-    // --- Donation Checks ---
     if (isNaN(amount) || amount < MIN_DONATION_AMOUNT) {
       alert(`Please enter a valid donation amount (minimum $${MIN_DONATION_AMOUNT}).`)
       return
@@ -63,15 +98,12 @@ export default function CreatorPage({ params }: { params: { username: string } }
       alert(`Your message cannot exceed ${MAX_MESSAGE_LENGTH} characters.`)
       return
     }
-    // --- End Donation Checks ---
 
     setIsDonating(true)
     try {
-      // In a real app, this would integrate with Cash App API
       const cashAppUrl = `https://cash.app/$${params.username}/${amount}`
       window.open(cashAppUrl, "_blank")
 
-      // Send webhook notification
       const webhookResponse = await fetch("/api/donate-webhook", {
         method: "POST",
         headers: {
@@ -87,12 +119,8 @@ export default function CreatorPage({ params }: { params: { username: string } }
 
       if (!webhookResponse.ok) {
         console.error("Failed to send donation webhook:", await webhookResponse.text())
-        // Optionally, alert the user about webhook failure but proceed with donation
-        // alert("Donation processed, but failed to send notification. Please check console for details.")
       }
 
-      // For this simplified flow, we assume success after redirect and webhook send
-      // In a real app, a payment processor's webhook would confirm actual donation
       alert("Donation initiated! Thank you for your support.")
       setSelectedAmount(null)
       setCustomAmount("")
@@ -106,7 +134,6 @@ export default function CreatorPage({ params }: { params: { username: string } }
     }
   }, [selectedAmount, customAmount, message, donorName, params.username])
 
-  // This page doesn't have a theme toggle, so it will use the default light theme styling
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
       {/* Header */}
@@ -128,17 +155,8 @@ export default function CreatorPage({ params }: { params: { username: string } }
             Share
           </Button>
         </div>
-        {/* AdSense Ad - Header Banner */}
-        <div className="container mx-auto px-4 py-2 mt-2 text-center">
-          <ins
-            className="adsbygoogle"
-            style={{ display: "block" }}
-            data-ad-client="ca-pub-9971726695182172"
-            data-ad-slot="YOUR_HEADER_AD_SLOT_ID" // REPLACE WITH YOUR AD SLOT ID
-            data-ad-format="auto"
-            data-full-width-responsive="true"
-          ></ins>
-        </div>
+        {/* Adsterra Ad - Header Banner */}
+        <div id="creator-header-ad-container" className="container mx-auto px-4 py-2 mt-2 text-center"></div>
       </header>
 
       <div className="container mx-auto px-4 py-8">
@@ -149,7 +167,7 @@ export default function CreatorPage({ params }: { params: { username: string } }
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
                   <Avatar className="w-20 h-20 border-2 border-primary">
-                    <AvatarImage src="https://i.ibb.co/zh2sXYzD/baa8eys.jpg" /> {/* Updated to new image URL */}
+                    <AvatarImage src="https://i.ibb.co/zh2sXYzD/baa8eys.jpg" />
                     <AvatarFallback className="text-2xl bg-secondary text-secondary-foreground">
                       {params.username.charAt(0).toUpperCase()}
                     </AvatarFallback>
@@ -194,7 +212,7 @@ export default function CreatorPage({ params }: { params: { username: string } }
                     <span>$750 of $1,000 goal</span>
                     <span>75%</span>
                   </div>
-                  <Progress value={75} className="h-2 bg-secondary" /> {/* Progress bar background */}
+                  <Progress value={75} className="h-2 bg-secondary" />
                   <p className="text-sm text-muted-foreground">$250 to go! Thank you for your amazing support.</p>
                 </div>
               </CardContent>
@@ -290,7 +308,6 @@ export default function CreatorPage({ params }: { params: { username: string } }
                   </p>
                 </div>
 
-                {/* New: Donor Name Input */}
                 <div className="space-y-2">
                   <Label htmlFor="donor-name" className="text-sm font-medium text-foreground">
                     Your name (optional)
@@ -354,17 +371,8 @@ export default function CreatorPage({ params }: { params: { username: string } }
 
                 <p className="text-xs text-muted-foreground text-center">Secure payments powered by Cash App</p>
 
-                {/* AdSense Ad - In-form Ad */}
-                <div className="text-center mt-6">
-                  <ins
-                    className="adsbygoogle"
-                    style={{ display: "block" }}
-                    data-ad-client="ca-pub-9971726695182172"
-                    data-ad-slot="YOUR_IN_FORM_AD_SLOT_ID" // REPLACE WITH YOUR AD SLOT ID
-                    data-ad-format="auto"
-                    data-full-width-responsive="true"
-                  ></ins>
-                </div>
+                {/* Adsterra Ad - In-form Ad */}
+                <div id="creator-in-form-ad-container" className="text-center mt-6"></div>
               </CardContent>
             </Card>
           </div>

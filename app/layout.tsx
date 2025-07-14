@@ -1,6 +1,5 @@
 import type React from "react"
 import type { Metadata } from "next"
-// Removed: import Script from "next/script"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -16,15 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        {children}
-        {/* Google AdSense Script - Placed directly for verification */}
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9971726695182172"
-          crossOrigin="anonymous"
-        ></script>
-      </body>
+      <body>{children}</body>
     </html>
   )
 }
