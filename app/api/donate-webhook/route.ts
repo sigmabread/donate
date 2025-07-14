@@ -13,15 +13,14 @@ export async function POST(req: Request) {
 
     const payload = {
       username: "SupportMe Donation Bot",
-      avatar_url:
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_20250714_113935.jpg-iWsrbXhDSMplBBMQLoVszWjVxoMs89.jpeg", // Direct blob URL for Josie's picture
+      avatar_url: "https://i.ibb.co/zh2sXYzD/baa8eys.jpg", // Updated to new image URL
       embeds: [
         {
           title: "🎉 New Donation Received!",
           description: `A new supporter might have just sent a donation!`,
           color: 0x34bf0d, // Green color
           thumbnail: {
-            url: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_20250714_113935.jpg-iWsrbXhDSMplBBMQLoVszWjVxoMs89.jpeg", // Josie's picture as a thumbnail
+            url: "https://i.ibb.co/zh2sXYzD/baa8eys.jpg", // Updated to new image URL
           },
           fields: [
             {

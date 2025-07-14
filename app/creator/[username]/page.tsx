@@ -36,7 +36,7 @@ export default function CreatorPage({ params }: { params: { username: string } }
             <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
               <Heart className="w-5 h-5 text-primary-foreground fill-current" />
             </div>
-            <span className="text-xl font-bold text-foreground">SupportMe</span>
+            <span className="text-xl font-bold text-foreground">Donate Bread</span>
           </div>
 
           <Button
@@ -58,7 +58,7 @@ export default function CreatorPage({ params }: { params: { username: string } }
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
                   <Avatar className="w-20 h-20 border-2 border-primary">
-                    <AvatarImage src="/josie.jpg" /> {/* Removed query parameters */}
+                    <AvatarImage src="https://i.ibb.co/zh2sXYzD/baa8eys.jpg" /> {/* Updated to new image URL */}
                     <AvatarFallback className="text-2xl bg-secondary text-secondary-foreground">
                       {params.username.charAt(0).toUpperCase()}
                     </AvatarFallback>

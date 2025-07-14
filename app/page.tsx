@@ -48,7 +48,7 @@ const defaultContent: SiteContent = {
   description: "Creating content and sharing knowledge. Your support helps me continue doing what I love!",
   aboutText:
     "Thanks for considering supporting my work! Every contribution helps me create better content and keep everything accessible for everyone.",
-  profileImage: "/josie.jpg", // Ensure Josie's picture is the default
+  profileImage: "https://i.ibb.co/zh2sXYzD/baa8eys.jpg", // Updated to new image URL
   heroTitle: "Love what you do and make money too",
   heroSubtitle: "Support sigmabread's work and help keep the content coming!",
 }
@@ -219,11 +219,6 @@ export default function SigmaBreadPage() {
     }
   }, [editContent])
 
-  const handleCancelEdit = useCallback(() => {
-    setEditContent(siteContent)
-    setIsEditMode(false)
-  }, [siteContent])
-
   const handleImageUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
@@ -289,6 +284,11 @@ export default function SigmaBreadPage() {
   const toggleTheme = useCallback(() => {
     setIsDarkMode((prev) => !prev)
   }, [])
+
+  const handleCancelEdit = useCallback(() => {
+    setEditContent(siteContent)
+    setIsEditMode(false)
+  }, [siteContent])
 
   if (isLoadingContent) {
     return (
