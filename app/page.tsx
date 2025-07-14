@@ -62,6 +62,13 @@ const MAX_DONATION_AMOUNT = 1250
 const MAX_DONOR_NAME_LENGTH = 64
 const MAX_MESSAGE_LENGTH = 256
 
+// Declare adsbygoogle on the Window object
+declare global {
+  interface Window {
+    adsbygoogle: unknown[]
+  }
+}
+
 export default function SigmaBreadPage() {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [customAmount, setCustomAmount] = useState("")
@@ -146,6 +153,17 @@ export default function SigmaBreadPage() {
       localStorage.setItem("theme", "light")
     }
   }, [isDarkMode])
+
+  // Trigger AdSense ads after component mounts
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.adsbygoogle) {
+      try {
+        ;(window.adsbygoogle = window.adsbygoogle || []).push({})
+      } catch (e) {
+        console.error("AdSense push error:", e)
+      }
+    }
+  }, [])
 
   // handleAdminLogin for password only
   const handleAdminLogin = useCallback(async () => {
@@ -406,6 +424,17 @@ export default function SigmaBreadPage() {
             </Button>
           </nav>
         </div>
+        {/* AdSense Ad - Header Banner */}
+        <div className="container mx-auto px-4 py-2 mt-2 text-center">
+          <ins
+            className="adsbygoogle"
+            style={{ display: "block" }}
+            data-ad-client="ca-pub-9971726695182172"
+            data-ad-slot="YOUR_HEADER_AD_SLOT_ID" // REPLACE WITH YOUR AD SLOT ID
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          ></ins>
+        </div>
       </header>
 
       {/* Hero Section */}
@@ -646,6 +675,18 @@ export default function SigmaBreadPage() {
 
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground">Cash App: ${siteContent.cashApp}</p>
+                </div>
+
+                {/* AdSense Ad - In-form Ad */}
+                <div className="text-center mt-6">
+                  <ins
+                    className="adsbygoogle"
+                    style={{ display: "block" }}
+                    data-ad-client="ca-pub-9971726695182172"
+                    data-ad-slot="YOUR_IN_FORM_AD_SLOT_ID" // REPLACE WITH YOUR AD SLOT ID
+                    data-ad-format="auto"
+                    data-full-width-responsive="true"
+                  ></ins>
                 </div>
               </CardContent>
             </Card>

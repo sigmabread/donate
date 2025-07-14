@@ -1,5 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
+import Script from "next/script" // Import Script component
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -15,7 +16,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Google AdSense Script */}
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9971726695182172"
+          crossOrigin="anonymous"
+          strategy="afterInteractive" // Load after the page is interactive
+        />
+      </body>
     </html>
   )
 }

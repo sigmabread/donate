@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Heart, Coffee, DollarSign, Share2, Users, Target, Loader2 } from "lucide-react"
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react" // Import useEffect
 import { cn } from "@/lib/utils"
 
 // Donation limits
@@ -18,12 +18,30 @@ const MAX_DONATION_AMOUNT = 1250
 const MAX_DONOR_NAME_LENGTH = 64
 const MAX_MESSAGE_LENGTH = 256
 
+// Declare adsbygoogle on the Window object
+declare global {
+  interface Window {
+    adsbygoogle: unknown[]
+  }
+}
+
 export default function CreatorPage({ params }: { params: { username: string } }) {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [customAmount, setCustomAmount] = useState("")
   const [message, setMessage] = useState("")
   const [donorName, setDonorName] = useState("") // New state for donor name
   const [isDonating, setIsDonating] = useState(false) // For donation button loading state
+
+  // Trigger AdSense ads after component mounts
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.adsbygoogle) {
+      try {
+        ;(window.adsbygoogle = window.adsbygoogle || []).push({})
+      } catch (e) {
+        console.error("AdSense push error:", e)
+      }
+    }
+  }, [])
 
   const handleDonation = useCallback(async () => {
     const amount = selectedAmount || Number.parseFloat(customAmount)
@@ -109,6 +127,17 @@ export default function CreatorPage({ params }: { params: { username: string } }
             <Share2 className="w-4 h-4 mr-2" />
             Share
           </Button>
+        </div>
+        {/* AdSense Ad - Header Banner */}
+        <div className="container mx-auto px-4 py-2 mt-2 text-center">
+          <ins
+            className="adsbygoogle"
+            style={{ display: "block" }}
+            data-ad-client="ca-pub-9971726695182172"
+            data-ad-slot="YOUR_HEADER_AD_SLOT_ID" // REPLACE WITH YOUR AD SLOT ID
+            data-ad-format="auto"
+            data-full-width-responsive="true"
+          ></ins>
         </div>
       </header>
 
@@ -324,6 +353,18 @@ export default function CreatorPage({ params }: { params: { username: string } }
                 </div>
 
                 <p className="text-xs text-muted-foreground text-center">Secure payments powered by Cash App</p>
+
+                {/* AdSense Ad - In-form Ad */}
+                <div className="text-center mt-6">
+                  <ins
+                    className="adsbygoogle"
+                    style={{ display: "block" }}
+                    data-ad-client="ca-pub-9971726695182172"
+                    data-ad-slot="YOUR_IN_FORM_AD_SLOT_ID" // REPLACE WITH YOUR AD SLOT ID
+                    data-ad-format="auto"
+                    data-full-width-responsive="true"
+                  ></ins>
+                </div>
               </CardContent>
             </Card>
           </div>
